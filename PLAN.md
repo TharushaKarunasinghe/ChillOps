@@ -6,7 +6,7 @@ Work top to bottom. Tick a box only when its acceptance criteria are met. One ta
 
 - [x] 0.1 Monorepo scaffold. pnpm workspace with `apps/web`, `apps/api`, `packages/shared`. TypeScript strict mode, ESLint, Prettier, Vitest. Root scripts: `dev`, `build`, `lint`, `typecheck`, `test`.
   Acceptance: all root scripts run cleanly on a fresh clone.
-- [ ] 0.2 Hello world deploy. A `/health` endpoint on a Cloudflare Worker, and a placeholder page on Cloudflare Pages that calls it.
+- [x] 0.2 Hello world deploy. A `/health` endpoint on a Cloudflare Worker, and a placeholder page on Cloudflare Pages that calls it.
   Acceptance: both deployed and reachable.
 - [ ] 0.3 CI. GitHub Actions runs lint, typecheck and tests on every pull request and push.
   Acceptance: a green check on GitHub.
