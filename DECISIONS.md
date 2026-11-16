@@ -12,5 +12,5 @@
 
 - `/health` is public and read-only. Hono handles OPTIONS; CORS grants browser access only when Origin exactly matches the runtime `WEB_ORIGIN` binding, with no wildcard fallback.
 - Wrangler is the only new direct dependency, providing the local Worker runtime and bundle/deployment CLI. Dependency build scripts are allowed only for esbuild and workerd; no Node.js compatibility flag is needed by the Worker.
-- Local configuration lives in ignored package-local files with committed examples. Production `WEB_ORIGIN` is supplied with Wrangler's `--var` option, while `VITE_API_URL` is embedded at build time.
+- Production WEB_ORIGIN lives in wrangler.toml so plain deployments preserve CORS configuration. CLI --var overrides are not persistent configuration. Local development overrides it through .dev.vars; VITE_API_URL remains embedded at build time.
 - API build uses Wrangler's dry-run mode so root build verifies the Worker bundle without publishing. Deployment remains manual, ordered API, Pages, then API with the final Pages origin.

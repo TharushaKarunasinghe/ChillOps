@@ -84,6 +84,6 @@ $healthResponse = Invoke-WebRequest -UseBasicParsing "$apiUrl/health" -Headers @
 $healthResponse.Headers['Access-Control-Allow-Origin']
 ```
 
-The last command should print the exact Pages origin. Open that Pages URL and confirm the page displays `{ "status": "ok" }` (JSON whitespace may differ). Pass `--var "WEB_ORIGIN:$webOrigin"` on subsequent API deployments as well so the environment-specific binding remains explicit. Use an origin only, with no path or trailing slash. Preview URLs are intentionally not allowed by this single-origin configuration.
+The last command should print the exact Pages origin. Open that Pages URL and confirm the page displays `{ "status": "ok" }` (JSON whitespace may differ). Use an origin only, with no path or trailing slash. Preview URLs are intentionally not allowed by this single-origin configuration.
 
 These commands use [Wrangler deployment options](https://developers.cloudflare.com/workers/wrangler/commands/) and [Pages project creation and upload](https://developers.cloudflare.com/workers/wrangler/commands/pages/). The Worker uses compatibility date `2026-11-01` and does not enable `nodejs_compat`; the health endpoint needs only Web APIs.
