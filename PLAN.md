@@ -4,7 +4,7 @@ Work top to bottom. Tick a box only when its acceptance criteria are met. One ta
 
 ## Phase 0: Foundations
 
-- [ ] 0.1 Monorepo scaffold. pnpm workspace with `apps/web`, `apps/api`, `packages/shared`. TypeScript strict mode, ESLint, Prettier, Vitest. Root scripts: `dev`, `build`, `lint`, `typecheck`, `test`.
+- [x] 0.1 Monorepo scaffold. pnpm workspace with `apps/web`, `apps/api`, `packages/shared`. TypeScript strict mode, ESLint, Prettier, Vitest. Root scripts: `dev`, `build`, `lint`, `typecheck`, `test`.
   Acceptance: all root scripts run cleanly on a fresh clone.
 - [ ] 0.2 Hello world deploy. A `/health` endpoint on a Cloudflare Worker, and a placeholder page on Cloudflare Pages that calls it.
   Acceptance: both deployed and reachable.
