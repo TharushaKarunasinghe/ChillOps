@@ -1,0 +1,15 @@
+{
+  "name": "@chillops/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsc --noEmit --watch --preserveWatchOutput",
+    "build": "tsc --outDir dist --declaration",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@chillops/shared": "workspace:*",
+    "hono": "^4.10.0"
+  }
+}
