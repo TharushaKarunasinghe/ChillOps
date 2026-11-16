@@ -1,0 +1,7 @@
+name = "chillops-api"
+main = "src/index.ts"
+compatibility_date = "2026-11-01"
+workers_dev = true
+
+[dev]
+port = 8787
