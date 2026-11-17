@@ -10,7 +10,7 @@ Work top to bottom. Tick a box only when its acceptance criteria are met. One ta
   Acceptance: both deployed and reachable.
 - [x] 0.3 CI. GitHub Actions runs lint, typecheck and tests on every pull request and push.
   Acceptance: a green check on GitHub.
-- [ ] 0.4 Design tokens and base layout. Palette, fonts, spacing scale, app shell (navy sidebar, ice background), and a small kit: button, input, select, table, status label, form field. Follow the design rules in AGENTS.md.
+- [x] 0.4 Design tokens and base layout. Palette, fonts, spacing scale, app shell (navy sidebar, ice background), and a small kit: button, input, select, table, status label, form field. Follow the design rules in AGENTS.md.
   Acceptance: a style page at `/styleguide` shows every component and state.
 
 ## Phase 1: Core jobs
