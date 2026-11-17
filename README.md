@@ -40,6 +40,12 @@ Lint includes ESLint and Prettier checks. Typechecking covers root configuration
 
 `VITE_API_URL` is public configuration embedded in the web bundle at build time. Changing it requires rebuilding and deploying the web app. Never put secrets in Vite variables. No account IDs or credentials belong in this repository.
 
+## CI
+
+The `CI` workflow runs on pull requests and pushes to `main`. It reads the pnpm version from `package.json` and the Node.js version from `.nvmrc`, caches the pnpm store, and installs with a frozen lockfile. Lint, Typecheck, Test and Build run as separate named steps on Ubuntu.
+
+Runs have read-only repository permissions and a ten-minute timeout. New runs cancel older runs for the same branch or pull request. `.gitattributes` specifies LF line endings for text files across Windows and Linux. No deployment or secrets are configured; the API build uses Wrangler's local dry-run mode without Cloudflare login. View results under the repository's **Actions** tab or the pull request checks.
+
 ## Manual deployment (Windows PowerShell)
 
 Run the steps below in order from the repository root. They publish to Cloudflare and are intended for you to run manually. Authenticate once using the browser login:
