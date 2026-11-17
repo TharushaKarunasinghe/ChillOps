@@ -1,8 +1,5 @@
-import { APP_NAME } from '@chillops/shared';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-
-export const applicationName = APP_NAME;
 
 const app = new Hono<{ Bindings: { WEB_ORIGIN?: string } }>();
 

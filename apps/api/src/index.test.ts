@@ -1,8 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import app from './index';
+import * as entry from './index';
 
 const webOrigin = 'http://localhost:5173';
 const bindings = { WEB_ORIGIN: webOrigin };
+
+describe('Worker entry exports', () => {
+  it('exports only the default handler', () => {
+    expect(Object.keys(entry)).toEqual(['default']);
+  });
+});
 
 describe('GET /health', () => {
   it('returns public JSON health without an Origin header', async () => {
