@@ -8,7 +8,7 @@ Work top to bottom. Tick a box only when its acceptance criteria are met. One ta
   Acceptance: all root scripts run cleanly on a fresh clone.
 - [x] 0.2 Hello world deploy. A `/health` endpoint on a Cloudflare Worker, and a placeholder page on Cloudflare Pages that calls it.
   Acceptance: both deployed and reachable.
-- [ ] 0.3 CI. GitHub Actions runs lint, typecheck and tests on every pull request and push.
+- [x] 0.3 CI. GitHub Actions runs lint, typecheck and tests on every pull request and push.
   Acceptance: a green check on GitHub.
 - [ ] 0.4 Design tokens and base layout. Palette, fonts, spacing scale, app shell (navy sidebar, ice background), and a small kit: button, input, select, table, status label, form field. Follow the design rules in AGENTS.md.
   Acceptance: a style page at `/styleguide` shows every component and state.
