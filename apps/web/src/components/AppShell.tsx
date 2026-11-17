@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router';
+import { NavLink, Outlet } from 'react-router';
 import { APP_NAME } from '@chillops/shared';
+import { useApiHealth } from '../hooks/useApiHealth';
 
 export function AppShell() {
   const [open, setOpen] = useState(false);
   const toggle = useRef<HTMLButtonElement>(null);
   const navigation = useRef<HTMLElement>(null);
-  const location = useLocation();
+  const health = useApiHealth();
 
   useEffect(() => {
     const query = window.matchMedia('(min-width: 48rem)');
@@ -46,7 +47,7 @@ export function AppShell() {
             aria-controls="main-navigation"
             onClick={() => setOpen(!open)}
           >
-            Menu
+            {open ? 'Close' : 'Menu'}
           </button>
         </div>
         <nav
@@ -81,15 +82,16 @@ export function AppShell() {
       </aside>
       <div className="main-column">
         <div className="topbar">
-          <span>Service operations</span>
-          <span className="text-secondary">
-            {location.pathname === '/styleguide'
-              ? 'Design reference'
-              : 'System status'}
+          <span className="text-secondary" aria-live="polite">
+            {health.state === 'checking'
+              ? 'Checking API...'
+              : health.state === 'connected'
+                ? 'API connected'
+                : 'API unreachable'}
           </span>
         </div>
         <main id="main-content" tabIndex={-1} className="content">
-          <Outlet />
+          <Outlet context={health} />
         </main>
       </div>
     </div>

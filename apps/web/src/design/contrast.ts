@@ -86,6 +86,8 @@ export const pairs: ContrastPair[] = [
   ),
   text('Disabled buttons / controls', 'disabled-text', 'disabled-bg'),
   text('Error panel', 'error-text', 'error-bg'),
+  nonText('Error panel border', 'error-text', 'error-bg'),
+  text('Hovered table row', 'text-primary', 'ice'),
   nonText('Checkbox check mark', 'white', 'link'),
   ...statuses.map((status) =>
     text(`${statusNames[status]} label`, `${status}-text`, `${status}-bg`),

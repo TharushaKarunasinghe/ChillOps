@@ -33,12 +33,12 @@
   --assigned-bg: #e0f2fe;
   --in-transit-text: #854d0e;
   --in-transit-bg: #fef3c7;
-  --on-site-text: #155e75;
-  --on-site-bg: #cffafe;
+  --on-site-text: #115e59;
+  --on-site-bg: #ccfbf1;
   --completed-text: #166534;
   --completed-bg: #dcfce7;
-  --pending-text: #92400e;
-  --pending-bg: #ffedd5;
+  --pending-text: #9a3412;
+  --pending-bg: #ffdfcc;
   --radius: 0.25rem;
   --space-0: 0rem;
   --space-1: 0.25rem;
@@ -56,6 +56,7 @@
   --space-24: 6rem;
   --space-64: 16rem;
   --space-80: 20rem;
+  --shell-padding-inline: var(--space-6);
   --dropdown-shadow: 0 4px 12px rgb(11 25 44 / 12%);
 }
 
@@ -132,6 +133,7 @@
   --spacing-24: var(--space-24);
   --spacing-64: var(--space-64);
   --spacing-80: var(--space-80);
+  --spacing-shell: var(--shell-padding-inline);
 }
 
 @utility tabular-nums {

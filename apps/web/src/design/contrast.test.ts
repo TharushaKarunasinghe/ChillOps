@@ -14,6 +14,24 @@ describe('design contrast', () => {
     expect(contrastRatio('#ffffff', '#ffffff')).toBe(1);
   });
 
+  it('covers all six status text-on-tint pairs at AA', () => {
+    const labels = evaluateContrast(css).filter((pair) =>
+      pair.purpose.endsWith(' label'),
+    );
+    expect(labels.map((pair) => pair.foreground).sort()).toEqual([
+      'assigned-text',
+      'completed-text',
+      'in-transit-text',
+      'on-site-text',
+      'pending-text',
+      'unassigned-text',
+    ]);
+    for (const label of labels) {
+      expect(label.minimum).toBe(4.5);
+      expect(label.ratio).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
   it.each(evaluateContrast(css).filter((pair) => pair.minimum > 0))(
     '$purpose: $foreground on $background',
     (pair) => {

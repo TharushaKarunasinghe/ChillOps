@@ -39,25 +39,27 @@ Ratios use WCAG sRGB relative luminance. Normal text requires 4.5:1; meaningful 
 | Danger button                          | white (#ffffff)              | danger-active (#7f1d1d)    | 10.02:1 | 4.5:1         |
 | Disabled buttons / controls            | disabled-text (#475569)      | disabled-bg (#e8edf2)      | 6.43:1  | 4.5:1         |
 | Error panel                            | error-text (#991b1b)         | error-bg (#fee2e2)         | 6.80:1  | 4.5:1         |
+| Error panel border                     | error-text (#991b1b)         | error-bg (#fee2e2)         | 6.80:1  | 3:1           |
+| Hovered table row                      | text-primary (#0b192c)       | ice (#f4f7fa)              | 16.42:1 | 4.5:1         |
 | Checkbox check mark                    | white (#ffffff)              | link (#00618a)             | 6.83:1  | 3:1           |
 | Unassigned label                       | unassigned-text (#475569)    | unassigned-bg (#e8edf2)    | 6.43:1  | 4.5:1         |
 | Assigned label                         | assigned-text (#075985)      | assigned-bg (#e0f2fe)      | 6.59:1  | 4.5:1         |
 | In transit label                       | in-transit-text (#854d0e)    | in-transit-bg (#fef3c7)    | 6.15:1  | 4.5:1         |
-| On site label                          | on-site-text (#155e75)       | on-site-bg (#cffafe)       | 6.49:1  | 4.5:1         |
+| On site label                          | on-site-text (#115e59)       | on-site-bg (#ccfbf1)       | 6.73:1  | 4.5:1         |
 | Completed label                        | completed-text (#166534)     | completed-bg (#dcfce7)     | 6.49:1  | 4.5:1         |
-| Pending label                          | pending-text (#92400e)       | pending-bg (#ffedd5)       | 6.19:1  | 4.5:1         |
+| Pending label                          | pending-text (#9a3412)       | pending-bg (#ffdfcc)       | 5.80:1  | 4.5:1         |
 | Unassigned tint on white (decorative)  | unassigned-bg (#e8edf2)      | white (#ffffff)            | 1.18:1  | Informational |
 | Unassigned tint on ice (decorative)    | unassigned-bg (#e8edf2)      | ice (#f4f7fa)              | 1.10:1  | Informational |
 | Assigned tint on white (decorative)    | assigned-bg (#e0f2fe)        | white (#ffffff)            | 1.15:1  | Informational |
 | Assigned tint on ice (decorative)      | assigned-bg (#e0f2fe)        | ice (#f4f7fa)              | 1.07:1  | Informational |
 | In transit tint on white (decorative)  | in-transit-bg (#fef3c7)      | white (#ffffff)            | 1.11:1  | Informational |
 | In transit tint on ice (decorative)    | in-transit-bg (#fef3c7)      | ice (#f4f7fa)              | 1.04:1  | Informational |
-| On site tint on white (decorative)     | on-site-bg (#cffafe)         | white (#ffffff)            | 1.12:1  | Informational |
-| On site tint on ice (decorative)       | on-site-bg (#cffafe)         | ice (#f4f7fa)              | 1.04:1  | Informational |
+| On site tint on white (decorative)     | on-site-bg (#ccfbf1)         | white (#ffffff)            | 1.13:1  | Informational |
+| On site tint on ice (decorative)       | on-site-bg (#ccfbf1)         | ice (#f4f7fa)              | 1.05:1  | Informational |
 | Completed tint on white (decorative)   | completed-bg (#dcfce7)       | white (#ffffff)            | 1.10:1  | Informational |
 | Completed tint on ice (decorative)     | completed-bg (#dcfce7)       | ice (#f4f7fa)              | 1.02:1  | Informational |
-| Pending tint on white (decorative)     | pending-bg (#ffedd5)         | white (#ffffff)            | 1.15:1  | Informational |
-| Pending tint on ice (decorative)       | pending-bg (#ffedd5)         | ice (#f4f7fa)              | 1.07:1  | Informational |
+| Pending tint on white (decorative)     | pending-bg (#ffdfcc)         | white (#ffffff)            | 1.26:1  | Informational |
+| Pending tint on ice (decorative)       | pending-bg (#ffdfcc)         | ice (#f4f7fa)              | 1.17:1  | Informational |
 | Decorative divider (no minimum)        | border (#d6dee8)             | white (#ffffff)            | 1.36:1  | Informational |
 | Decorative divider (no minimum)        | border-subtle (#e8edf2)      | white (#ffffff)            | 1.18:1  | Informational |
 | Decorative divider (no minimum)        | border (#d6dee8)             | ice (#f4f7fa)              | 1.26:1  | Informational |

@@ -216,7 +216,7 @@ export function StyleguidePage() {
           title="Form controls"
           description="Native input, select and textarea. Labels are linked to controls; help and error text are described by ID. Hover darkens the boundary to navy without a transition. Focus uses a dark outline with an offset."
         >
-          <div className="sample-grid">
+          <div className="sample-grid form-grid">
             <FormField
               label="Branch"
               help="Use the branch name on the job card."
@@ -397,7 +397,7 @@ export function StyleguidePage() {
             </tbody>
           </Table>
           <h3 className="mt-6 mb-3">Error state</h3>
-          <p className="text-error-text bg-error-bg p-3 rounded-sm">
+          <p className="error-panel text-error-text bg-error-bg p-3 rounded-sm">
             Unable to load breakdowns. Try again.
           </p>
         </Section>

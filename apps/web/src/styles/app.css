@@ -80,7 +80,7 @@
   .sidebar {
     background: var(--navy);
     color: var(--text-on-navy);
-    padding: var(--space-4);
+    padding: var(--space-4) var(--shell-padding-inline);
   }
   .sidebar a {
     color: var(--text-on-navy);
@@ -129,7 +129,7 @@
   }
   .navigation a {
     display: block;
-    padding: var(--space-3);
+    padding: var(--space-3) 0;
     border-radius: var(--radius);
     text-decoration: none;
   }
@@ -143,7 +143,7 @@
     justify-content: space-between;
     align-items: center;
     gap: var(--space-2);
-    padding: var(--space-3);
+    padding: var(--space-3) 0;
     color: var(--text-muted-on-navy);
   }
   .nav-placeholder small {
@@ -152,23 +152,23 @@
   .nav-caption {
     color: var(--text-muted-on-navy);
     font-size: var(--text-xs);
-    padding: var(--space-6) var(--space-3) var(--space-2);
+    padding: var(--space-6) 0 var(--space-2);
   }
   .main-column {
     min-width: 0;
   }
   .topbar {
-    padding: var(--space-4) var(--space-6);
+    padding: var(--space-4) var(--shell-padding-inline);
     border-bottom: 1px solid var(--border);
     background: var(--white);
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2) var(--space-6);
-    justify-content: space-between;
+    justify-content: flex-end;
     font-size: var(--text-sm);
   }
   .content {
-    padding: var(--space-6);
+    padding: var(--space-6) var(--shell-padding-inline);
     min-width: 0;
   }
   .skip-link {
@@ -222,6 +222,13 @@
   .sample-grid {
     display: grid;
     gap: var(--space-6);
+  }
+  .form-grid {
+    align-items: start;
+  }
+  .form-grid > .field {
+    align-content: start;
+    padding: var(--space-1);
   }
   .sample {
     display: grid;
@@ -420,6 +427,12 @@
   .data-table tr:last-child td {
     border-bottom: 0;
   }
+  .data-table tbody tr:hover {
+    background: var(--ice);
+  }
+  .error-panel {
+    border: 1px solid var(--error-text);
+  }
   .data-table .id-cell,
   .data-table .quantity-cell {
     font-family: var(--font-mono);
@@ -515,6 +528,9 @@
   }
   @media (width >= 48rem) {
     .app-shell {
+      --shell-padding-inline: var(--space-8);
+    }
+    .app-shell {
       display: grid;
       grid-template-columns: var(--space-64) minmax(0, 1fr);
     }
@@ -523,7 +539,7 @@
       top: 0;
       height: 100dvh;
       overflow: auto;
-      padding: var(--space-6) var(--space-4);
+      padding: var(--space-6) var(--shell-padding-inline);
     }
     .navigation,
     .navigation[data-open='false'] {
@@ -536,7 +552,7 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .content {
-      padding: var(--space-8);
+      padding: var(--space-8) var(--shell-padding-inline);
     }
   }
 }
