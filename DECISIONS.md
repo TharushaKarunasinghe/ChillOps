@@ -14,3 +14,12 @@
 - Wrangler is the only new direct dependency, providing the local Worker runtime and bundle/deployment CLI. Dependency build scripts are allowed only for esbuild and workerd; no Node.js compatibility flag is needed by the Worker.
 - Production WEB_ORIGIN lives in wrangler.toml so plain deployments preserve CORS configuration. CLI --var overrides are not persistent configuration. Local development overrides it through .dev.vars; VITE_API_URL remains embedded at build time.
 - API build uses Wrangler's dry-run mode so root build verifies the Worker bundle without publishing. Deployment remains manual, ordered API, Pages, then API with the final Pages origin.
+
+## Task 0.4: design tokens and base layout
+
+- IBM Plex Sans and Mono follow the project typography rules. Fontsource Latin normal 400, 500 and 600 imports self-host only the used weights with swap rendering; tables use tabular numerals.
+- CSS variables are the single color source, mapped into Tailwind's CSS-first theme with its defaults removed. The named spacing scale replaces open-ended spacing; the only radius is 4px and the unused dropdown shadow is defined once.
+- Secondary text is darker than base silver. Control boundaries use a darker silver-derived token, while offset focus rings use dark blue on light surfaces and accent on navy. Light dividers and status tints are decorative.
+- The contrast generator and tests read the actual CSS tokens. The generated report includes every declared text/state pairing plus non-text checks and decorative reference ratios; a stale report fails root tests.
+- Native elements cover this kit without shadcn or headless primitives, preserving semantics and avoiding an unused dependency. Placeholder navigation has no links; the mobile navigation uses a disclosure button with Escape handling.
+- Tailwind and its Vite plugin provide the requested utility compiler; React Router provides home and styleguide routing. No business features or additional component libraries are introduced.

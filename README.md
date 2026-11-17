@@ -40,6 +40,14 @@ Lint includes ESLint and Prettier checks. Typechecking covers root configuration
 
 `VITE_API_URL` is public configuration embedded in the web bundle at build time. Changing it requires rebuilding and deploying the web app. Never put secrets in Vite variables. No account IDs or credentials belong in this repository.
 
+## Design system
+
+Open `/styleguide` while running `pnpm dev` to review tokens, typography, spacing, all six status labels, native form controls, button states and a fictional job table. `/` retains the API health check. On narrow screens, use the Menu button to open navigation; Escape closes it and restores focus. Placeholder operations entries are non-interactive and marked Not built yet.
+
+Colors live in `apps/web/src/styles/tokens.css` and map into a restricted Tailwind CSS theme. Use the named spacing steps and semantic colors instead of arbitrary utilities. Text uses IBM Plex Sans; IDs, times and quantities use IBM Plex Mono. Only Latin normal 400, 500 and 600 font files are imported, with `font-display: swap`.
+
+Run `pnpm design:contrast` with Node.js 24 from `.nvmrc` after changing tokens. This generates [the contrast report](docs/design-contrast.md) from the CSS values through `apps/web/src/design/contrast.ts`. Root `pnpm test` checks the text and non-text ratios and fails if the report is stale. Decorative status tints are listed for reference; meaning is always conveyed by their text labels.
+
 ## CI
 
 The `CI` workflow runs on pull requests and pushes to `main`. It reads the pnpm version from `package.json` and the Node.js version from `.nvmrc`, caches the pnpm store, and installs with a frozen lockfile. Lint, Typecheck, Test and Build run as separate named steps on Ubuntu.
