@@ -32,7 +32,7 @@ describe('private database configuration', () => {
     try {
       writeFileSync(
         file,
-        'WEB_ORIGIN=http://localhost:5173\nDATABASE_URL="postgresql://synthetic:private@file.example.invalid/db"\n',
+        'DATABASE_URL="postgresql://synthetic:private@file.example.invalid/db"\n',
       );
       const varsFile = pathToFileURL(file).href;
       expect(inspectConfig({}, varsFile)).toEqual({

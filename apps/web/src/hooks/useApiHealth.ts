@@ -6,16 +6,8 @@ export interface ApiHealth {
 }
 
 async function checkHealth(): Promise<ApiHealth> {
-  const apiUrl = import.meta.env.VITE_API_URL?.trim();
-  if (!apiUrl) {
-    return {
-      state: 'unreachable',
-      result:
-        'API URL is not configured. Set VITE_API_URL and restart or rebuild the web app.',
-    };
-  }
   try {
-    const response = await fetch(`${apiUrl.replace(/\/+$/, '')}/health`);
+    const response = await fetch('/api/health');
     if (!response.ok) {
       return {
         state: 'unreachable',
@@ -28,7 +20,7 @@ async function checkHealth(): Promise<ApiHealth> {
     return {
       state: 'unreachable',
       result:
-        'Unable to read API health. Check that the API is reachable, VITE_API_URL is correct, and WEB_ORIGIN allows this page.',
+        'Unable to read API health. Check that the API is reachable and try reloading the page.',
     };
   }
 }

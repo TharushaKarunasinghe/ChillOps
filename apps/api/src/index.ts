@@ -1,21 +1,8 @@
 import { Hono } from 'hono';
-import { cors } from 'hono/cors';
 
-const app = new Hono<{ Bindings: { WEB_ORIGIN?: string } }>();
+const app = new Hono();
 
-app.use(
-  '/health',
-  cors({
-    origin: (origin, context) => {
-      const allowedOrigin = context.env?.WEB_ORIGIN;
-      return allowedOrigin && allowedOrigin !== '*' && origin === allowedOrigin
-        ? origin
-        : undefined;
-    },
-    allowMethods: ['GET', 'OPTIONS'],
-  }),
-);
-
-app.get('/health', (context) => context.json({ status: 'ok' }));
+app.get('/api/health', (context) => context.json({ status: 'ok' }));
+app.notFound((context) => context.json({ error: 'Not found' }, 404));
 
 export default app;

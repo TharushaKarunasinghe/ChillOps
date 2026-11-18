@@ -11,18 +11,17 @@ Run these commands from the repository root in Windows PowerShell. Copy the exam
 ```powershell
 pnpm install --frozen-lockfile
 Copy-Item apps/api/.dev.vars.example apps/api/.dev.vars
-Copy-Item apps/web/.env.local.example apps/web/.env.local
 pnpm dev
 ```
 
-`pnpm dev` starts Vite at `http://localhost:5173` and the local Worker at `http://localhost:8787` in parallel. Stop both with Ctrl+C. Open the web page to see the API's health JSON or a clear error message. Keep the web origin at port 5173 to match the example configuration.
+`pnpm dev` builds web assets only when `apps/web/dist` does not exist, then starts Vite at `http://localhost:5173` and Wrangler at `http://localhost:8787` in parallel. Vite proxies `/api` to Wrangler without changing the path. Open the Vite URL for live web development; stop both with Ctrl+C. Wrangler serves the last built web assets when opened directly.
 
-`apps/api/.dev.vars` supplies `WEB_ORIGIN=http://localhost:5173`. `apps/web/.env.local` supplies `VITE_API_URL=http://localhost:8787`. Both files are gitignored. The root `.env.example` lists the variables and commented local defaults; the applications load their own local files, not the root example.
+`apps/api/.dev.vars` holds private database configuration. No web environment file is needed. Existing local files are not modified: remove obsolete `WEB_ORIGIN=...` from `apps/api/.dev.vars` and `VITE_API_URL=...` from `apps/web/.env.local` yourself, preserving any other settings.
 
 ## Workspace
 
-- `apps/web`: unstyled React page that fetches `/health`, importing `@chillops/shared`.
-- `apps/api`: Hono Worker with public `GET /health` returning `{ "status": "ok" }` and OPTIONS preflight support.
+- `apps/web`: React app and styleguide, using relative `/api/health` requests and `@chillops/shared`.
+- `apps/api`: Hono Worker with public `GET /api/health` returning `{ "status": "ok" }`, plus the built web assets. Unknown API paths return JSON 404 responses.
 - `packages/shared`: shared TypeScript exports and a workspace smoke test.
 
 ## Commands
@@ -34,11 +33,9 @@ pnpm test
 pnpm build
 ```
 
-Lint includes ESLint and Prettier checks. Typechecking covers root configuration and all three packages. Vitest covers the shared workspace import, health JSON, exact CORS matching and preflight. Build emits shared JavaScript and declarations, a Worker bundle using Wrangler's local dry-run mode, and the Vite web bundle into the respective `dist` directories. Build does not publish anything.
+Lint includes ESLint and Prettier checks. Typechecking covers root configuration and all three packages. Vitest checks API routing, shared exports, database schema and design contrast. Build runs shared, then web, then the Worker dry-run in order so its assets directory is ready. CI already calls this root build script; it does not deploy or require Cloudflare login.
 
-`WEB_ORIGIN` is a non-secret Worker binding read at request time. Only an exact match receives an `Access-Control-Allow-Origin` header; no wildcards or prefix matching are used. Missing configuration grants no browser origin access. CORS does not authenticate requests: `/health` is intentionally public, including requests without an Origin header.
-
-`VITE_API_URL` is public configuration embedded in the web bundle at build time. Changing it requires rebuilding and deploying the web app. Never put secrets in Vite variables. No account IDs or credentials belong in this repository.
+The browser uses relative `/api/...` URLs on the same origin as the web app. No CORS middleware or origin environment variables are needed. Static asset routing serves the SPA while `/api` and `/api/*` run the Worker first. An unknown API route stays a JSON 404, including when opened directly in a browser.
 
 ## Design system
 
@@ -72,7 +69,7 @@ Migration and verification are manual, never part of CI or application startup. 
 
 Verification checks cross-customer branches, cross-branch equipment, contact ownership, coordinate pairing, case-insensitive user email uniqueness, nullable system actors, the manual actor requirement, job-number generation, and rejection of UPDATE, DELETE and TRUNCATE on `job_events`. It uses savepoints and an outer `ROLLBACK`, even on failure. Fixture rows do not persist, but PostgreSQL sequence increments are not transactional: verification can leave gaps in job numbers. Run it against a development branch while no other work is using it; the TRUNCATE rejection check briefly requests a table lock, bounded by a five-second lock timeout.
 
-`0000_core_schema.sql` is generated from the Drizzle schema. `0001_database_guards.sql` is a drizzle-kit custom migration for database triggers, which Drizzle's table declarations do not express. Root tests inspect the offline schema and migration guards; only the manual verification command proves enforcement against PostgreSQL. The runtime HTTP client is an unconnected factory until used and does not change `/health`.
+`0000_core_schema.sql` is generated from the Drizzle schema. `0001_database_guards.sql` is a drizzle-kit custom migration for database triggers, which Drizzle's table declarations do not express. Root tests inspect the offline schema and migration guards; only the manual verification command proves enforcement against PostgreSQL. The runtime HTTP client is an unconnected factory until used and does not connect when serving `/api/health`.
 
 ## CI
 
@@ -80,50 +77,32 @@ The `CI` workflow runs on pull requests and pushes to `main`. It reads the pnpm 
 
 Runs have read-only repository permissions and a ten-minute timeout. New runs cancel older runs for the same branch or pull request. `.gitattributes` specifies LF line endings for text files across Windows and Linux. No deployment or secrets are configured; the API build uses Wrangler's local dry-run mode without Cloudflare login. View results under the repository's **Actions** tab or the pull request checks.
 
-## Manual deployment (Windows PowerShell)
+## Manual release (Windows PowerShell)
 
-Run the steps below in order from the repository root. They publish to Cloudflare and are intended for you to run manually. Authenticate once using the browser login:
+Run these commands from the repository root. Authenticate if needed, then release the web app and API together:
 
 ```powershell
 pnpm --filter @chillops/api exec wrangler login
+pnpm run release
+if ($LASTEXITCODE -ne 0) { throw 'Release failed.' }
 ```
 
-### A. Deploy the API first
+`pnpm run release` builds the web app first, then runs Wrangler deploy only if that build succeeds. Use `run release` explicitly; pnpm has its own built-in `deploy` command. Wrangler uploads `apps/web/dist` with the Worker, using the path `../web/dist` relative to `apps/api/wrangler.toml`. Database migrations remain separate and manual.
+
+Verify the Worker URL printed by Wrangler:
 
 ```powershell
-pnpm --filter @chillops/api exec wrangler deploy
-$apiUrl = (Read-Host 'Paste the https://...workers.dev URL printed above').TrimEnd('/')
-Invoke-RestMethod "$apiUrl/health"
+$workerUrl = (Read-Host 'Paste the https://...workers.dev URL').TrimEnd('/')
+Invoke-RestMethod "$workerUrl/api/health"
+$page = Invoke-WebRequest -UseBasicParsing "$workerUrl/styleguide"
+$page.StatusCode
+$page.Headers['Content-Type']
+Start-Process "$workerUrl/styleguide"
+Start-Process "$workerUrl/"
 ```
 
-Note the printed `workers.dev` URL. The health endpoint is reachable before a web origin is configured, but cross-origin browser reads remain disabled until step C. Local `.dev.vars` values are not deployed.
+Expected: health returns `{ "status": "ok" }`; `/styleguide` returns HTTP 200 with HTML and displays the styleguide after a direct navigation or refresh. The home page shows **API connected**. In browser Network tools, the health request should go to `/api/health` on that same Worker origin.
 
-### B. Build and deploy the web app to Pages
+The old Pages deployment stops working after this change because its separate API URL and CORS support have been removed. Once the Worker deployment is verified, the old Pages project can be deleted manually. This repository change does not deploy anything or delete that project.
 
-Choose an available Pages project name when prompted. The project creation command is needed only once. Run the block in the same PowerShell session as step A:
-
-```powershell
-$pagesProject = Read-Host 'Choose your Pages project name'
-pnpm --filter @chillops/api exec wrangler pages project create $pagesProject --production-branch main
-$env:VITE_API_URL = $apiUrl
-pnpm --filter @chillops/web build
-if ($LASTEXITCODE -ne 0) { throw 'Web build failed; do not deploy.' }
-Remove-Item Env:VITE_API_URL
-pnpm --filter @chillops/api exec wrangler pages deploy ../web/dist --project-name $pagesProject --branch main
-```
-
-The shell variable overrides the local Vite file during the build. The Pages upload path is relative to `apps/api`, where the filtered command runs. Use the stable production Pages URL shown for the project, not an individual deployment's preview URL. Until step C, the page may display a CORS error.
-
-### C. Set the Worker origin and redeploy the API
-
-```powershell
-$webOrigin = (Read-Host 'Paste the production https://...pages.dev URL').TrimEnd('/')
-pnpm --filter @chillops/api exec wrangler deploy --var "WEB_ORIGIN:$webOrigin"
-Invoke-RestMethod "$apiUrl/health"
-$healthResponse = Invoke-WebRequest -UseBasicParsing "$apiUrl/health" -Headers @{ Origin = $webOrigin }
-$healthResponse.Headers['Access-Control-Allow-Origin']
-```
-
-The last command should print the exact Pages origin. Open that Pages URL and confirm the page displays `{ "status": "ok" }` (JSON whitespace may differ). Use an origin only, with no path or trailing slash. Preview URLs are intentionally not allowed by this single-origin configuration.
-
-These commands use [Wrangler deployment options](https://developers.cloudflare.com/workers/wrangler/commands/) and [Pages project creation and upload](https://developers.cloudflare.com/workers/wrangler/commands/pages/). The Worker uses compatibility date `2026-11-01` and does not enable `nodejs_compat`; the health endpoint needs only Web APIs.
+Static assets use `not_found_handling = "single-page-application"` for the `index.html` fallback and `run_worker_first = ["/api", "/api/*"]` to reserve API paths. See Cloudflare's [static assets configuration](https://developers.cloudflare.com/workers/static-assets/binding/) and [SPA routing](https://developers.cloudflare.com/workers/static-assets/routing/single-page-application/). The existing compatibility date remains `2026-11-01`; no `nodejs_compat` flag is required.

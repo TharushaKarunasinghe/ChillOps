@@ -7,8 +7,9 @@
     "node": ">=20"
   },
   "scripts": {
-    "dev": "pnpm --parallel --filter @chillops/web --filter @chillops/api run dev",
-    "build": "pnpm -r run build",
+    "dev": "node scripts/ensure-web-assets.mjs && pnpm --parallel --filter @chillops/web --filter @chillops/api run dev",
+    "build": "pnpm --filter @chillops/shared build && pnpm --filter @chillops/web build && pnpm --filter @chillops/api build",
+    "release": "pnpm --filter @chillops/web build && pnpm --filter @chillops/api exec wrangler deploy",
     "lint": "eslint . && prettier --check .",
     "typecheck": "tsc --project tsconfig.json && pnpm -r run typecheck",
     "test": "vitest run",

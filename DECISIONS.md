@@ -37,3 +37,9 @@
 - Migration generation is offline. The manual migration runner reads a private `DATABASE_URL`, prints only its hostname, and uses the approved Neon driver's WebSocket transport for transactional migration execution. Verification uses the same transport with savepoints and an unconditional outer rollback; neither command belongs in CI.
 - Drizzle ORM, the Neon serverless driver and drizzle-kit are the only new direct database dependencies. Existing Hono, TypeScript and Vitest cannot supply PostgreSQL queries or migration generation; Node.js 24 supplies dotenv parsing and WebSocket support without extra packages.
 - Assignments, roster and inventory belong to later tasks. This migration deliberately creates no such tables, status transition rules, API routes, screens or seed dataset.
+
+## Task 1.2a: same-origin deployment
+
+- One Worker serves the SPA and `/api/*`; relative URLs remove CORS configuration and avoid reliance on cross-site session cookies, which browsers can block through third-party cookie restrictions. Authentication remains task 1.2.
+- Explicit Worker-first API patterns prevent SPA fallback from turning unknown API requests into HTML. Other routes use Cloudflare's static assets and `index.html` fallback, without an assets binding in application code.
+- Build order is shared, web, then Worker dry-run. `pnpm run release` builds web before deployment; development builds initial web assets only when the output directory is absent, then uses Vite's API proxy. This supersedes the separate Pages/API deployment and origin settings recorded in task 0.2.
