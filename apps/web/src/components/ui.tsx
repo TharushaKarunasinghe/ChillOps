@@ -111,7 +111,7 @@ export function FormField({
 
 export function StatusLabel({ status }: { status: JobStatus }) {
   return (
-    <span className={`status-label status-${status}`}>
+    <span className={`status-label status-${status.replaceAll('_', '-')}`}>
       {statusNames[status]}
     </span>
   );

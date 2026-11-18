@@ -1,17 +1,11 @@
-export const statuses = [
-  'unassigned',
-  'assigned',
-  'in-transit',
-  'on-site',
-  'completed',
-  'pending',
-] as const;
-export type JobStatus = (typeof statuses)[number];
+import { JOB_STATUSES, type JobStatus } from '@chillops/shared';
+export const statuses = JOB_STATUSES;
+export type { JobStatus } from '@chillops/shared';
 export const statusNames: Record<JobStatus, string> = {
   unassigned: 'Unassigned',
   assigned: 'Assigned',
-  'in-transit': 'In transit',
-  'on-site': 'On site',
+  in_transit: 'In transit',
+  on_site: 'On site',
   completed: 'Completed',
   pending: 'Pending',
 };
@@ -90,12 +84,16 @@ export const pairs: ContrastPair[] = [
   text('Hovered table row', 'text-primary', 'ice'),
   nonText('Checkbox check mark', 'white', 'link'),
   ...statuses.map((status) =>
-    text(`${statusNames[status]} label`, `${status}-text`, `${status}-bg`),
+    text(
+      `${statusNames[status]} label`,
+      `${status.replaceAll('_', '-')}-text`,
+      `${status.replaceAll('_', '-')}-bg`,
+    ),
   ),
   ...statuses.flatMap((status) =>
     ['white', 'ice'].map((bg) => ({
       purpose: `${statusNames[status]} tint on ${bg} (decorative)`,
-      foreground: `${status}-bg`,
+      foreground: `${status.replaceAll('_', '-')}-bg`,
       background: bg,
       minimum: 0,
     })),

@@ -48,6 +48,32 @@ Colors live in `apps/web/src/styles/tokens.css` and map into a restricted Tailwi
 
 Run `pnpm design:contrast` with Node.js 24 from `.nvmrc` after changing tokens. This generates [the contrast report](docs/design-contrast.md) from the CSS values through `apps/web/src/design/contrast.ts`. Root `pnpm test` checks the text and non-text ratios and fails if the report is stale. Decorative status tints are listed for reference; meaning is always conveyed by their text labels.
 
+## Database schema and migrations (task 1.1)
+
+The nine tables are defined in `apps/api/src/db/schema.ts`. Drizzle ORM supplies the typed schema and queries, `@neondatabase/serverless` supplies HTTP and WebSocket transports, and drizzle-kit generates the SQL and migration metadata. No database connection is needed for generation, tests or builds.
+
+Use Node.js 24 from `.nvmrc`. Set `DATABASE_URL` privately in `apps/api/.dev.vars`, or in your shell environment; an environment value takes precedence. Keep credentials out of commands, screenshots and commits. Tooling prints only the database hostname and suppresses raw driver errors.
+
+Run these commands from the repository root in PowerShell:
+
+```powershell
+# Offline: generate a migration after an approved schema change.
+pnpm --filter @chillops/api db:generate
+
+# Review every SQL file in apps/api/drizzle before applying it.
+# This command writes to the selected database. Check the printed hostname.
+pnpm --filter @chillops/api db:migrate
+
+# After migration, verify constraints with synthetic fixtures and roll them back.
+pnpm --filter @chillops/api db:verify-schema
+```
+
+Migration and verification are manual, never part of CI or application startup. Both use the Neon driver's WebSocket connection and Node's built-in WebSocket support. The migration runner sets UTC on its session; PostgreSQL `timestamptz` stores instants regardless of the session display timezone. Mutable tables update `updated_at` with database triggers.
+
+Verification checks cross-customer branches, cross-branch equipment, contact ownership, coordinate pairing, case-insensitive user email uniqueness, nullable system actors, the manual actor requirement, job-number generation, and rejection of UPDATE, DELETE and TRUNCATE on `job_events`. It uses savepoints and an outer `ROLLBACK`, even on failure. Fixture rows do not persist, but PostgreSQL sequence increments are not transactional: verification can leave gaps in job numbers. Run it against a development branch while no other work is using it; the TRUNCATE rejection check briefly requests a table lock, bounded by a five-second lock timeout.
+
+`0000_core_schema.sql` is generated from the Drizzle schema. `0001_database_guards.sql` is a drizzle-kit custom migration for database triggers, which Drizzle's table declarations do not express. Root tests inspect the offline schema and migration guards; only the manual verification command proves enforcement against PostgreSQL. The runtime HTTP client is an unconnected factory until used and does not change `/health`.
+
 ## CI
 
 The `CI` workflow runs on pull requests and pushes to `main`. It reads the pnpm version from `package.json` and the Node.js version from `.nvmrc`, caches the pnpm store, and installs with a frozen lockfile. Lint, Typecheck, Test and Build run as separate named steps on Ubuntu.

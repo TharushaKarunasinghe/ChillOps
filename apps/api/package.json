@@ -6,13 +6,19 @@
   "scripts": {
     "dev": "wrangler dev",
     "build": "wrangler deploy --dry-run --outdir dist",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "node scripts/migrate.mjs",
+    "db:verify-schema": "node scripts/verify-schema.mjs"
   },
   "dependencies": {
     "@chillops/shared": "workspace:*",
+    "@neondatabase/serverless": "1.2.1",
+    "drizzle-orm": "0.45.4",
     "hono": "^4.10.0"
   },
   "devDependencies": {
+    "drizzle-kit": "0.31.11",
     "wrangler": "^4.162.0"
   }
 }
