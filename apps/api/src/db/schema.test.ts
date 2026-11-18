@@ -91,7 +91,7 @@ describe('offline database schema', () => {
     ).toContainEqual(['branch_id', 'customer_id']);
   });
 
-  it('ships both generated migrations and guards all event mutations', () => {
+  it('ships all migrations and guards event and audit mutations', () => {
     const journal = JSON.parse(
       readFileSync(
         new URL('../../drizzle/meta/_journal.json', import.meta.url),
@@ -101,6 +101,7 @@ describe('offline database schema', () => {
     expect(journal.entries.map((entry) => entry.tag)).toEqual([
       '0000_core_schema',
       '0001_database_guards',
+      '0002_audit_log_append_only',
     ]);
     const guards = readFileSync(
       new URL('../../drizzle/0001_database_guards.sql', import.meta.url),
@@ -110,6 +111,15 @@ describe('offline database schema', () => {
       /BEFORE UPDATE OR DELETE OR TRUNCATE ON "job_events"\s+FOR EACH STATEMENT/,
     );
     expect(guards).toContain("ERRCODE = '55000'");
+    const auditGuards = readFileSync(
+      new URL('../../drizzle/0002_audit_log_append_only.sql', import.meta.url),
+      'utf8',
+    );
+    expect(auditGuards).toMatch(
+      /BEFORE UPDATE OR DELETE OR TRUNCATE ON "audit_log"\s+FOR EACH STATEMENT/,
+    );
+    expect(auditGuards).toContain("ERRCODE = '55000'");
+    expect(auditGuards).toContain("MESSAGE = 'audit_log is append-only'");
     for (const table of tables.slice(0, 7)) {
       expect(guards).toContain(
         `BEFORE UPDATE ON "${getTableConfig(table).name}"`,

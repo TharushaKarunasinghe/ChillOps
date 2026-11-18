@@ -164,6 +164,30 @@ try {
       [],
       '55000',
     );
+    const audit = (
+      await client.query(
+        "INSERT INTO audit_log (actor_id, action, entity_type, entity_id) VALUES ($1, 'synthetic_verification', 'job', $2) RETURNING id",
+        [user, job.id],
+      )
+    ).rows[0].id;
+    await rejected(
+      'audit_log rejects UPDATE',
+      "UPDATE audit_log SET action = 'Changed' WHERE id = $1",
+      [audit],
+      '55000',
+    );
+    await rejected(
+      'audit_log rejects DELETE',
+      'DELETE FROM audit_log WHERE id = $1',
+      [audit],
+      '55000',
+    );
+    await rejected(
+      'audit_log rejects TRUNCATE',
+      'TRUNCATE TABLE audit_log',
+      [],
+      '55000',
+    );
   } finally {
     try {
       await client.query('ROLLBACK');
@@ -176,7 +200,7 @@ try {
   );
 } catch {
   error(
-    'Schema verification failed. Check configuration, connectivity and that both migrations were applied. No driver details are logged.',
+    'Schema verification failed. Check configuration, connectivity and that all migrations were applied. No driver details are logged.',
   );
   process.exitCode = 1;
 } finally {
