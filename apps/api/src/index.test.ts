@@ -16,13 +16,13 @@ describe('API routing', () => {
     expect(await response.json()).toEqual({ status: 'ok' });
   });
 
-  it('returns JSON 404 for unknown API paths, including browser navigation', async () => {
+  it('requires authentication for unknown API paths, including browser navigation', async () => {
     const response = await app.request('/api/not-found', {
       headers: { Accept: 'text/html', 'Sec-Fetch-Mode': 'navigate' },
     });
-    expect(response.status).toBe(404);
+    expect(response.status).toBe(401);
     expect(response.headers.get('Content-Type')).toContain('application/json');
-    expect(await response.json()).toEqual({ error: 'Not found' });
+    expect(await response.json()).toEqual({ error: 'Authentication required' });
   });
 
   it('does not expose the old health route in the Worker', async () => {

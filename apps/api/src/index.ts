@@ -1,8 +1,3 @@
-import { Hono } from 'hono';
+import { createApp } from './app';
 
-const app = new Hono();
-
-app.get('/api/health', (context) => context.json({ status: 'ok' }));
-app.notFound((context) => context.json({ error: 'Not found' }, 404));
-
-export default app;
+export default createApp();

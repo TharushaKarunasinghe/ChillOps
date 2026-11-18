@@ -19,6 +19,37 @@ const tables = [
 const dialect = new PgDialect();
 
 describe('offline database schema', () => {
+  it('defines revocable sessions and only the requested lookup indexes', () => {
+    const sessions = getTableConfig(schema.sessions);
+    expect(sessions.columns.map((column) => column.name)).toEqual([
+      'id',
+      'created_at',
+      'user_id',
+      'token_hash',
+      'last_seen_at',
+      'expires_at',
+      'revoked_at',
+      'ip',
+      'user_agent',
+    ]);
+    expect(sessions.indexes.map((index) => index.config.name)).toEqual([
+      'sessions_token_hash_unique',
+    ]);
+    expect(sessions.foreignKeys[0]?.onDelete).toBe('restrict');
+    expect(schema.sessions.revokedAt.notNull).toBe(false);
+    expect(schema.sessions.expiresAt.getSQLType()).toBe(
+      'timestamp with time zone',
+    );
+    const attempts = getTableConfig(schema.loginAttempts);
+    expect(attempts.columns.map((column) => column.name)).toEqual([
+      'key',
+      'created_at',
+    ]);
+    expect(attempts.indexes.map((index) => index.config.name)).toEqual([
+      'login_attempts_key_time_idx',
+    ]);
+    expect(attempts.columns.some((column) => column.primary)).toBe(false);
+  });
   it('reuses shared statuses and the approved priorities', () => {
     expect(schema.jobStatus.enumValues).toEqual(JOB_STATUSES);
     expect(schema.jobPriority.enumValues).toEqual([
@@ -102,6 +133,7 @@ describe('offline database schema', () => {
       '0000_core_schema',
       '0001_database_guards',
       '0002_audit_log_append_only',
+      '0003_authentication',
     ]);
     const guards = readFileSync(
       new URL('../../drizzle/0001_database_guards.sql', import.meta.url),

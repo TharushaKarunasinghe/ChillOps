@@ -1,10 +1,12 @@
 import { JOB_STATUSES } from '@chillops/shared';
+import { USER_ROLES } from '@chillops/shared/auth';
 import { sql } from 'drizzle-orm';
 import {
   boolean,
   check,
   foreignKey,
   index,
+  inet,
   jsonb,
   numeric,
   pgEnum,
@@ -17,13 +19,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 
-export const userRole = pgEnum('user_role', [
-  'ops',
-  'technician',
-  'finance',
-  'storekeeper',
-  'director',
-]);
+export const userRole = pgEnum('user_role', USER_ROLES);
 export const technicianLevel = pgEnum('technician_level', ['senior', 'junior']);
 export const contactKind = pgEnum('contact_kind', ['email', 'phone']);
 export const equipmentType = pgEnum('equipment_type', [
@@ -256,3 +252,35 @@ export const auditLog = pgTable('audit_log', {
     .defaultNow()
     .notNull(),
 });
+
+export const sessions = pgTable(
+  'sessions',
+  {
+    ...identity(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'restrict' }),
+    tokenHash: text('token_hash').notNull(),
+    lastSeenAt: timestamp('last_seen_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+    ip: inet('ip'),
+    userAgent: text('user_agent'),
+  },
+  (table) => [uniqueIndex('sessions_token_hash_unique').on(table.tokenHash)],
+);
+
+export const loginAttempts = pgTable(
+  'login_attempts',
+  {
+    key: text('key').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index('login_attempts_key_time_idx').on(table.key, table.createdAt),
+  ],
+);

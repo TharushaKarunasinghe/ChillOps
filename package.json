@@ -13,6 +13,7 @@
     "lint": "eslint . && prettier --check .",
     "typecheck": "tsc --project tsconfig.json && pnpm -r run typecheck",
     "test": "vitest run",
+    "auth:benchmark": "pnpm --filter @chillops/api auth:benchmark",
     "design:contrast": "pnpm --filter @chillops/web design:contrast"
   },
   "devDependencies": {

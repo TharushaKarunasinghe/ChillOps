@@ -21,7 +21,7 @@ pnpm dev
 ## Workspace
 
 - `apps/web`: React app and styleguide, using relative `/api/health` requests and `@chillops/shared`.
-- `apps/api`: Hono Worker with public `GET /api/health` returning `{ "status": "ok" }`, plus the built web assets. Unknown API paths return JSON 404 responses.
+- `apps/api`: Hono Worker with public `GET /api/health` returning `{ "status": "ok" }`, authentication, and the built web assets. API routes require a session unless explicitly public; authenticated unknown paths return JSON 404 responses.
 - `packages/shared`: shared TypeScript exports and a workspace smoke test.
 
 ## Commands
@@ -35,7 +35,7 @@ pnpm build
 
 Lint includes ESLint and Prettier checks. Typechecking covers root configuration and all three packages. Vitest checks API routing, shared exports, database schema and design contrast. Build runs shared, then web, then the Worker dry-run in order so its assets directory is ready. CI already calls this root build script; it does not deploy or require Cloudflare login.
 
-The browser uses relative `/api/...` URLs on the same origin as the web app. No CORS middleware or origin environment variables are needed. Static asset routing serves the SPA while `/api` and `/api/*` run the Worker first. An unknown API route stays a JSON 404, including when opened directly in a browser.
+The browser uses relative `/api/...` URLs on the same origin as the web app. No CORS middleware or origin environment variables are needed. Static asset routing serves the SPA while `/api` and `/api/*` run the Worker first. An unauthenticated API request returns JSON 401; an authenticated unknown route returns JSON 404, including when opened directly in a browser.
 
 ## Design system
 
@@ -70,6 +70,44 @@ Migration and verification are manual, never part of CI or application startup. 
 Verification checks cross-customer branches, cross-branch equipment, contact ownership, coordinate pairing, case-insensitive user email uniqueness, nullable system actors, the manual actor requirement, job-number generation, and rejection of UPDATE, DELETE and TRUNCATE on `job_events`. It uses savepoints and an outer `ROLLBACK`, even on failure. Fixture rows do not persist, but PostgreSQL sequence increments are not transactional: verification can leave gaps in job numbers. Run it against a development branch while no other work is using it; the TRUNCATE rejection check briefly requests a table lock, bounded by a five-second lock timeout.
 
 `0000_core_schema.sql` is generated from the Drizzle schema. `0001_database_guards.sql` is a drizzle-kit custom migration for database triggers, which Drizzle's table declarations do not express. Root tests inspect the offline schema and migration guards; only the manual verification command proves enforcement against PostgreSQL. The runtime HTTP client is an unconnected factory until used and does not connect when serving `/api/health`.
+
+## Authentication (task 1.2)
+
+`/login` and `/styleguide` are public web routes. Other pages wait for the single initial `/api/auth/me` request and require a session. The top bar shows the signed-in user's name, role and Log out button. All API responses use `Cache-Control: no-store`; passwords and bearer tokens are never stored in browser storage.
+
+Before using authentication, review `apps/api/drizzle/0003_authentication.sql`, then run these commands yourself from the repository root. They write to the database selected by private `DATABASE_URL` in `apps/api/.dev.vars` or your environment:
+
+```powershell
+pnpm --filter @chillops/api db:migrate
+pnpm --filter @chillops/api auth:create-user
+```
+
+User creation requires a real interactive terminal, rejects command-line arguments, and prompts for a synthetic full name, email, role and hidden password. Passwords are normalized to Unicode NFC and must contain 12 to 128 Unicode characters, with no composition rules. The script reports the target hostname and created email; it does not echo passwords or print hashes or connection strings. This is an explicit operator command, not a seed script or public registration endpoint.
+
+Run `pnpm dev` and open `http://localhost:5173/login`. Localhost uses a `session` cookie; HTTPS uses `__Host-session`. Both are HttpOnly, Secure, SameSite=Lax, Path=/, with no Domain. Use literal `localhost` for local browser testing. Sessions expire after 12 hours idle or 7 days absolute, and last-seen writes occur no more than once every five minutes. Successful login creates a fresh session and revokes any carried old session; logout revokes the current session.
+
+`POST /api/auth/login` accepts `{ "email": "...", "password": "..." }`; `POST /api/auth/logout` accepts `{}`. Every non-GET API request must send an Origin exactly equal to the request origin, including scheme and port. Browsers supply this automatically. `GET /api/auth/me` returns public user fields or 401. Authentication applies by default to all API paths; only GET health and POST login are public. Protected feature routes can additionally use `requireRole(...roles)`.
+
+The Vite proxy explicitly sets `changeOrigin: false` to preserve the browser-facing Host. This lets the Worker apply the same exact Origin check locally and in production, without origin rewriting or a development allowlist.
+
+Login protection reserves both an email attempt and an IP attempt before hashing. The sixth email attempt or twenty-first IP attempt within 15 minutes receives the same 429 message. Successful login clears only that email's attempts; IP attempts remain. Each login reservation removes attempts older than 24 hours. Missing or invalid `CF-Connecting-IP` uses a shared fallback bucket and stores NULL in the session's inet column. Only Cloudflare's header is used, never X-Forwarded-For.
+
+Passwords use Web Crypto PBKDF2-SHA256 with the named 100,000-iteration policy, random 16-byte salts and a 32-byte result. Stored records include algorithm, cost, salt and hash. Successful login upgrades a differing stored cost in the same transaction as session creation and audit. Run the offline benchmark with:
+
+```powershell
+pnpm auth:benchmark
+```
+
+It prints mean and worst wall-clock time over 20 hashes and one unknown-email failed login, using an in-memory repository. It never loads DATABASE_URL or contacts a database. These Node timings are not production Worker CPU measurements: the Free plan allows 10 ms CPU per request, so maximum-cost password hashing may require Workers Paid. The isolated local workerd probe accepted 100,000, 100,001 and 1,000,000 iterations; local acceptance above 100,000 does not prove the production limit has changed.
+
+Production also needs `DATABASE_URL` as a Worker secret; `.dev.vars` is local only. Set it interactively yourself, without putting the value in command arguments, and release only after the migration and account are ready:
+
+```powershell
+pnpm --filter @chillops/api exec wrangler secret put DATABASE_URL
+pnpm run release
+```
+
+No migration, user creation or deployment is performed by tests, benchmarks, build or CI. Database tests use fake repositories or intercepted HTTP requests; live SQL enforcement and production CPU remain manual checks.
 
 ## CI
 

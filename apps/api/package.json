@@ -9,7 +9,9 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node scripts/migrate.mjs",
-    "db:verify-schema": "node scripts/verify-schema.mjs"
+    "db:verify-schema": "node scripts/verify-schema.mjs",
+    "auth:create-user": "node scripts/create-user.mjs",
+    "auth:benchmark": "node scripts/auth-benchmark.mjs"
   },
   "dependencies": {
     "@chillops/shared": "workspace:*",

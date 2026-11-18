@@ -171,6 +171,13 @@
     padding: var(--space-6) var(--shell-padding-inline);
     min-width: 0;
   }
+  .login-form {
+    max-width: calc(var(--space-64) * 2);
+  }
+  .auth-user {
+    margin-right: auto;
+    overflow-wrap: anywhere;
+  }
   .skip-link {
     position: absolute;
     top: var(--space-2);

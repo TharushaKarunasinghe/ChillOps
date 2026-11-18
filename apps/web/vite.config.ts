@@ -7,6 +7,7 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true,
-    proxy: { '/api': 'http://localhost:8787' },
+    // Preserve the browser-facing Host so strict Origin checks also work locally.
+    proxy: { '/api': { target: 'http://localhost:8787', changeOrigin: false } },
   },
 });
