@@ -18,7 +18,7 @@ Work top to bottom. Tick a box only when its acceptance criteria are met. One ta
 - [x] 1.1 Database schema and migrations (Drizzle): users, technicians, customers, branches, equipment, jobs, job_events, audit_log.
 - [x] 1.2a Same-origin deployment
 - [x] 1.2 Auth: email and password, httpOnly cookie session, role middleware.
-- [ ] 1.3 Seed script with synthetic data (fictional customers, branches, technicians).
+- [x] 1.3 Seed script with synthetic data (fictional customers, branches, technicians).
 - [ ] 1.4 Jobs API and pending jobs screen, with the status event log.
 
 ## Phase 2: Email intake and AI
