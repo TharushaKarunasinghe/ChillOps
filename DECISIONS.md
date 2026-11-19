@@ -56,3 +56,23 @@
 - A conditional INSERT with count subqueries alone can race. Neon HTTP `db.batch` sends a single transaction containing SET TRANSACTION READ COMMITTED, a separate transaction-scoped advisory-lock statement, 24-hour cleanup, then INSERT SELECT conditional on both counts. The fresh snapshot after lock acquisition sees prior committed reservations. All reservations and successful email resets share this lock; no interactive HTTP transaction or new database function is required. The global lock serializes only short attempt operations, not password hashing.
 - Attempt keys are namespaced SHA-256 digests of normalized email or validated IP. Limits are five per email and twenty per IP over fifteen minutes; successful login deletes email attempts only. Missing/invalid IP uses one fallback bucket and SQL NULL. The two-column attempts table intentionally permits duplicate rows and has only a key/time index; sessions have only their primary key and unique token-hash index.
 - Zod is the only new dependency, providing the requested shared runtime schemas. Node.js supplies hidden terminal input and benchmarking; create-user is explicit operator tooling rather than task 1.3 seeding. No database-writing command was run during implementation.
+
+## Password hashing cost on the Workers Free plan (2026-11-20)
+
+Decision: keep PBKDF2-SHA256 at 100,000 iterations, the highest value I could
+rely on in the Workers runtime.
+
+Context: Cloudflare's Free plan allows 10 ms of CPU time per request. A local
+Node benchmark averaged 16.7 ms per hash (worst 24.4 ms), so I expected login to
+exceed the limit.
+
+Result: login on the deployed Worker (chillops-api.chillops-demo.workers.dev)
+worked with a production user, including wrong-password attempts. Node
+wall-clock time is not the same as the CPU time Cloudflare measures, and native
+Web Crypto in workerd appears to be cheaper.
+
+Consequences: this is verified only by a manual test on this date, not
+guaranteed. If Cloudflare changes its limits or login starts failing with
+error 1102, the options are a lower iteration count (the stored hash format
+lets old and new hashes coexist and re-hash on login), Workers Paid, or
+hashing in a separate Node service.
