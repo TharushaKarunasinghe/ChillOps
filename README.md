@@ -4,7 +4,7 @@ Operations software for refrigeration and air conditioning service work. All pro
 
 ## Setup
 
-Use Node.js 24 (see `.nvmrc`) and pnpm 12.21.0, pinned in `package.json`. The declared Node.js minimum is 20.
+Use Node.js 24.16.0 (see `.nvmrc`) or newer and pnpm 12.21.0, pinned in `package.json`. The supported minimum is 24.16.0 in `engines.node`; CI reads the same version from `.nvmrc`. Direct TypeScript imports need Node's type stripping, enabled without flags from 22.18; this project standardizes on the tested Node 24 LTS version. No TypeScript runner is needed.
 
 Run these commands from the repository root in Windows PowerShell. Copy the examples once; keep any existing local settings.
 
@@ -108,6 +108,40 @@ pnpm run release
 ```
 
 No migration, user creation or deployment is performed by tests, benchmarks, build or CI. Database tests use fake repositories or intercepted HTTP requests; live SQL enforcement and production CPU remain manual checks.
+
+## Synthetic demo data (task 1.3)
+
+After applying the existing migrations, run these commands yourself from the repository root:
+
+```powershell
+pnpm --filter @chillops/api db:seed
+pnpm --filter @chillops/api db:seed:check
+
+# Deletes this dataset and the seeded users' sessions and audit history.
+pnpm --filter @chillops/api db:seed:reset --allow-append-only-bypass
+```
+
+Seed and reset print the database hostname and require you to type it exactly before any writes. Seed asks for one demo password twice with hidden input, using the existing 12 to 128 character NFC password validation and API password hasher. Passwords cannot be passed as arguments. Each new account gets its own random salt. Use an interactive terminal. Successful seed/reset commands print no row data; a nonzero exit means failure. Check prints table counts and PASS/FAIL results in a read-only transaction.
+
+The fixture contains 15 users (2 ops, 1 finance, 1 storekeeper, 1 director, 10 technicians), 10 technician profiles (4 senior, 6 junior), 5 customers, 14 branches, 45 equipment items, 21 email contacts, 30 jobs and 130 events. It creates no sessions, audit entries, login attempts, roster, assignment or inventory data.
+
+| Customer              | Branches | Equipment |
+| --------------------- | -------: | --------: |
+| Frostfern Markets     |        4 |        15 |
+| Cloudberry Grocers    |        3 |        10 |
+| Moonwell Picturehouse |        2 |         6 |
+| Driftwillow Hotels    |        3 |         8 |
+| Silvermoss Pharmacies |        2 |         6 |
+
+Scenarios: six recent unassigned breakdowns (two critical), four pending jobs with reasons, and twenty completed jobs over sixty days (twelve breakdowns, eight planned services). One freezer has three breakdowns within six weeks; Frostfern has twelve of the twenty-two breakdowns. One completed job includes a pending/reassigned revisit. Two Frostfern branches deliberately share an extra contact address. Jobs mix email/system intake and manual/ops intake. Travel and site events include nearby coordinates. Visit durations vary by priority and fixed-seed jitter.
+
+Names, phones and branch names are fictional; addresses are area names only. Staff emails use `chillops.test`, customer emails use `.example`. Inspect the complete fixture in `apps/api/src/seed/data.ts`. The named staff include Mira Vale, Oren Finch, Tavi Reed, Nela Moss and Lio Wren; email addresses follow `first.last@chillops.test`.
+
+Times are relative to the seed run, mostly 08:00 to 18:00 Asia/Colombo, with some evening calls and no Sundays. On Sunday, recent jobs use Saturday slots within the last 24 hours; near midnight several different jobs can share a report time. Event times within each job remain strictly increasing. Existing fixed-ID rows, passwords and dates are left unchanged on reruns. Existing job IDs are read under a table lock before inserts, so reruns never evaluate their sequence defaults. New jobs are inserted in ascending `reported_at` order. Job numbers are database-generated and may differ after reset; rollbacks can leave normal sequence gaps. Rerunning an older dataset does not refresh its ages. Reset then seed to refresh it.
+
+Reset uses one transaction, checks that both append-only guards are enabled, locks affected tables, disables only the named guards, deletes its fixed IDs in dependency order, then re-enables guards before commit. It also deletes **all sessions and actor-owned audit rows for seeded users, including rows created later by real logins**. Login attempts and unrelated users are untouched. Non-seed foreign-key references cause reset to fail and roll back; they are never silently cascaded. If a guard is already disabled or missing, reset refuses to proceed. Transaction rollback restores guard state on failure, including connection loss.
+
+The scripts reuse Neon `Pool` transactions with `neonConfig.webSocketConstructor = globalThis.WebSocket`, supplied by Node 24, without a `ws` dependency. See [Neon's driver configuration](https://github.com/neondatabase/serverless/blob/main/CONFIG.md) and [Node type stripping](https://nodejs.org/api/typescript.html). Unit tests exercise transaction ordering and rollback using fake clients; they do not prove live connectivity or privileges. None of these database commands runs in CI, startup, tests or build.
 
 ## CI
 

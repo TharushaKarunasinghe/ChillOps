@@ -57,6 +57,15 @@
 - Attempt keys are namespaced SHA-256 digests of normalized email or validated IP. Limits are five per email and twenty per IP over fifteen minutes; successful login deletes email attempts only. Missing/invalid IP uses one fallback bucket and SQL NULL. The two-column attempts table intentionally permits duplicate rows and has only a key/time index; sessions have only their primary key and unique token-hash index.
 - Zod is the only new dependency, providing the requested shared runtime schemas. Node.js supplies hidden terminal input and benchmarking; create-user is explicit operator tooling rather than task 1.3 seeding. No database-writing command was run during implementation.
 
+## Task 1.3: synthetic seed data
+
+- Fixed UUID namespaces and fixed-seed variation identify only demo rows; timestamps are deterministic for a supplied clock. Password salts remain random for security, while job numbers remain database sequence values. Existing IDs are checked under a write-conflicting table lock before inserts, so reruns skip rows without consuming job numbers; new jobs are inserted by reported time and reset never rewinds the sequence.
+- The supported Node minimum and CI version are 24.16.0. Native TypeScript stripping and `globalThis.WebSocket` let the existing Neon Pool run interactive transactions without another runner or WebSocket dependency. Local mock tests verify transaction behavior; no live database-writing command was run during implementation.
+- Current seed statuses are unassigned, pending and completed. Assigned, in-transit and on-site steps appear only in synthetic historical events because actual assignment records belong to a later task. Email intake uses null system actors; manual intake uses ops users. No roster, inventory or assignments are seeded.
+- Demo reset is an explicit operator-only exception to append-only storage: hostname confirmation plus `--allow-append-only-bypass`, one transaction, table locks, enabled-guard preconditions and scoped deletes. Both guards are re-enabled before commit; PostgreSQL transactional DDL restores them on rollback. Unrelated foreign-key references abort the reset instead of widening its scope.
+- Reset also removes sessions and audit rows owned by seeded users, including rows created later by real logins. Unrelated users and login-attempt records remain untouched. Existing fixed-ID rows and passwords are not refreshed on reruns; conflicting email ownership fails the transaction.
+- Report times avoid Sundays and mostly use Colombo business hours. Sunday runs use Saturday times within 24 hours; at midnight different jobs can share report times. Priority-dependent positive visit durations and strict per-job event ordering preserve the synthetic service histories.
+
 ## Password hashing cost on the Workers Free plan (2026-11-20)
 
 Decision: keep PBKDF2-SHA256 at 100,000 iterations, the highest value I could

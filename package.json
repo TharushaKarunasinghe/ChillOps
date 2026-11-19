@@ -4,7 +4,7 @@
   "type": "module",
   "packageManager": "pnpm@12.21.0",
   "engines": {
-    "node": ">=20"
+    "node": ">=24.16.0"
   },
   "scripts": {
     "dev": "node scripts/ensure-web-assets.mjs && pnpm --parallel --filter @chillops/web --filter @chillops/api run dev",
