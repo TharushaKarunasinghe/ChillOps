@@ -78,7 +78,14 @@ export function AppShell() {
           aria-label="Main navigation"
         >
           <ul>
-            {['Jobs', 'Roster', 'Stock', 'Reports'].map((name) => (
+            {auth.user && ['ops', 'director'].includes(auth.user.role) && (
+              <li>
+                <NavLink to="/jobs" onClick={() => setOpen(false)}>
+                  Jobs
+                </NavLink>
+              </li>
+            )}
+            {['Roster', 'Stock', 'Reports'].map((name) => (
               <li key={name} aria-disabled="true" className="nav-placeholder">
                 <span>{name}</span>
                 <small>Not built yet</small>

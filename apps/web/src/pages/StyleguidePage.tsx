@@ -14,6 +14,7 @@ import {
   FormField,
   Input,
   PageHeader,
+  PriorityLabel,
   Select,
   StatusLabel,
   Table,
@@ -324,6 +325,24 @@ export function StyleguidePage() {
               <Link to="/">Link on navy</Link>
               <p className="mt-3 text-sm">Focus: accent, with 2px offset.</p>
             </div>
+          </div>
+        </Section>
+        <Section
+          title="Priority labels"
+          description="Critical has a navy fill and semibold white text. Urgent has semibold navy text and a 1px navy outline. Routine has plain navy text without an outline. Each priority is named; fill, outline and weight remain distinguishable without color."
+        >
+          <div className="sample-grid">
+            {(['white', 'ice'] as const).map((surface) => (
+              <div key={surface} className={`focus-surface bg-${surface}`}>
+                <div className="inline-actions">
+                  {(['critical', 'urgent', 'routine'] as const).map(
+                    (priority) => (
+                      <PriorityLabel key={priority} priority={priority} />
+                    ),
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </Section>
         <Section

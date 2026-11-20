@@ -6,6 +6,13 @@ Ratios use WCAG sRGB relative luminance. Normal text requires 4.5:1; meaningful 
 
 | Purpose                                | Foreground                   | Background                 | Ratio   | Minimum       |
 | -------------------------------------- | ---------------------------- | -------------------------- | ------- | ------------- |
+| Critical priority                      | white (#ffffff)              | navy (#0b192c)             | 17.65:1 | 4.5:1         |
+| Urgent priority                        | navy (#0b192c)               | white (#ffffff)            | 17.65:1 | 4.5:1         |
+| Routine priority                       | navy (#0b192c)               | white (#ffffff)            | 17.65:1 | 4.5:1         |
+| Urgent priority outline                | navy (#0b192c)               | white (#ffffff)            | 17.65:1 | 3:1           |
+| Urgent priority                        | navy (#0b192c)               | ice (#f4f7fa)              | 16.42:1 | 4.5:1         |
+| Routine priority                       | navy (#0b192c)               | ice (#f4f7fa)              | 16.42:1 | 4.5:1         |
+| Urgent priority outline                | navy (#0b192c)               | ice (#f4f7fa)              | 16.42:1 | 3:1           |
 | Primary text                           | text-primary (#0b192c)       | white (#ffffff)            | 17.65:1 | 4.5:1         |
 | Secondary / help / placeholder         | text-secondary (#475569)     | white (#ffffff)            | 7.58:1  | 4.5:1         |
 | Links (all states)                     | link (#00618a)               | white (#ffffff)            | 6.83:1  | 4.5:1         |

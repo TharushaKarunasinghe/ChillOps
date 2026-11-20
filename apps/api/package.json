@@ -10,6 +10,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node scripts/migrate.mjs",
     "db:verify-schema": "node scripts/verify-schema.mjs",
+    "db:verify-jobs": "node scripts/verify-jobs.mjs",
     "db:seed": "node scripts/seed.mjs",
     "db:seed:check": "node scripts/seed-check.mjs",
     "db:seed:reset": "node scripts/seed-reset.mjs",

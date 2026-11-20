@@ -9,6 +9,19 @@ const css = readFileSync(
 );
 
 describe('design contrast', () => {
+  it('covers priority text and the Urgent outline on both light surfaces', () => {
+    const priorities = evaluateContrast(css).filter((pair) =>
+      pair.purpose.toLowerCase().includes('priority'),
+    );
+    expect(priorities).toHaveLength(7);
+    expect(
+      priorities
+        .filter((pair) => pair.purpose === 'Urgent priority outline')
+        .map((pair) => pair.background),
+    ).toEqual(['white', 'ice']);
+    for (const pair of priorities)
+      expect(pair.ratio).toBeGreaterThanOrEqual(pair.minimum);
+  });
   it('uses WCAG relative luminance', () => {
     expect(contrastRatio('#000000', '#ffffff')).toBe(21);
     expect(contrastRatio('#ffffff', '#ffffff')).toBe(1);

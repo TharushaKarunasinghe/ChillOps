@@ -16,6 +16,7 @@ type AuthState = {
 type AuthContextValue = AuthState & {
   login(email: string, password: string): Promise<void>;
   logout(): Promise<void>;
+  expireSession(): void;
 };
 const AuthContext = createContext<AuthContextValue | null>(null);
 let initialRequest: Promise<AuthState> | undefined;
@@ -121,7 +122,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     update(null);
   }
   return (
-    <AuthContext.Provider value={{ ...state, login, logout }}>
+    <AuthContext.Provider
+      value={{ ...state, login, logout, expireSession: () => update(null) }}
+    >
       {children}
     </AuthContext.Provider>
   );

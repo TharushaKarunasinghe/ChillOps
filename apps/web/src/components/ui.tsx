@@ -10,6 +10,16 @@ import type {
 } from 'react';
 import { statusNames } from '../design/contrast';
 import type { JobStatus } from '../design/contrast';
+import type { JobPriority } from '@chillops/shared/jobs';
+import { priorityNames } from '../jobs/format';
+
+export function PriorityLabel({ priority }: { priority: JobPriority }) {
+  return (
+    <span className={`priority-label priority-${priority}`}>
+      {priorityNames[priority]}
+    </span>
+  );
+}
 
 export function Button({
   variant = 'primary',

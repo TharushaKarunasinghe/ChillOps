@@ -66,6 +66,15 @@
 - Reset also removes sessions and audit rows owned by seeded users, including rows created later by real logins. Unrelated users and login-attempt records remain untouched. Existing fixed-ID rows and passwords are not refreshed on reruns; conflicting email ownership fails the transaction.
 - Report times avoid Sundays and mostly use Colombo business hours. Sunday runs use Saturday times within 24 hours; at midnight different jobs can share report times. Priority-dependent positive visit durations and strict per-job event ordering preserve the synthetic service histories.
 
+## Task 1.4: jobs API and needs-action screen
+
+- There is no public status-changing endpoint. The shared transition graph exposes exactly the six historical transitions, plus a separate null-to-unassigned initial-event check; assignment and technician actions remain Phase 4.
+- Manual creation uses one parameterized data-modifying CTE through Drizzle `db.execute` and the existing Neon HTTP driver. Locked customer, branch and equipment CTEs return a structured `error_field`; invalid ownership produces no insert, with no error-text parsing or follow-up ownership query. Event and audit inserts depend on the job's `RETURNING` rows, so an insert error rolls back the whole statement.
+- List filtering, joined names, `count(*) OVER()` and page selection happen in one query. Reading the total from the materialized filtered rows preserves it for out-of-range pages. An explicit CASE orders critical, urgent, routine, then oldest report and UUID; the web defaults to unassigned plus pending, with an explicit All statuses option.
+- TanStack React Query 5.108.1 adds caching, deduplication, mutation invalidation and visible-page polling without a hand-built cache. Pnpm added release-age exceptions for that exact version and its query-core dependency, not blanket build-script permissions. Job caches are scoped to the authenticated user/role and discarded on logout; mutation retries are disabled.
+- Priority uses text and shape: Critical is white semibold on navy, Urgent is semibold navy with a navy outline, Routine is plain navy. The existing palette suffices; the generated contrast report covers both light surfaces and the outline.
+- `db:verify-jobs` is manual and requires exact host confirmation. It imports the production statement builder, uses seeded synthetic IDs, and always rolls back its transaction without disabling append-only guards. PostgreSQL sequences are not transactional, so a verification run consumes a job number even though its rows roll back. It is not run by tests, CI or this implementation.
+
 ## Password hashing cost on the Workers Free plan (2026-11-20)
 
 Decision: keep PBKDF2-SHA256 at 100,000 iterations, the highest value I could

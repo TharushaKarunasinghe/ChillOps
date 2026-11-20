@@ -54,6 +54,12 @@ const nonText = (
 ): ContrastPair => ({ purpose, foreground, background, minimum: 3 });
 
 export const pairs: ContrastPair[] = [
+  text('Critical priority', 'white', 'navy'),
+  ...['white', 'ice'].flatMap((bg) => [
+    text('Urgent priority', 'navy', bg),
+    text('Routine priority', 'navy', bg),
+    nonText('Urgent priority outline', 'navy', bg),
+  ]),
   ...['white', 'ice'].flatMap((bg) => [
     text('Primary text', 'text-primary', bg),
     text('Secondary / help / placeholder', 'text-secondary', bg),

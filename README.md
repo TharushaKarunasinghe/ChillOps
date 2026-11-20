@@ -143,6 +143,31 @@ Reset uses one transaction, checks that both append-only guards are enabled, loc
 
 The scripts reuse Neon `Pool` transactions with `neonConfig.webSocketConstructor = globalThis.WebSocket`, supplied by Node 24, without a `ws` dependency. See [Neon's driver configuration](https://github.com/neondatabase/serverless/blob/main/CONFIG.md) and [Node type stripping](https://nodejs.org/api/typescript.html). Unit tests exercise transaction ordering and rollback using fake clients; they do not prove live connectivity or privileges. None of these database commands runs in CI, startup, tests or build.
 
+## Jobs (task 1.4)
+
+Ops and directors can open `/jobs` and `/jobs/:id`; only ops can use `/jobs/new`. The list defaults to unassigned and pending jobs, with status and priority filters, an All statuses option, and pagination. It orders critical, urgent, routine, then oldest report first. Lists refresh every 15 seconds while visible. UTC times display in Asia/Colombo; age is elapsed time since reporting. Creation submits once while the button is disabled, then opens the new detail. There is no status update endpoint.
+
+All routes require a session. Reads permit ops/director; creation and lookups permit ops only:
+
+| Route                                        | Contract                                                                                                                                                                                                                   |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /api/jobs`                              | Optional `status` (comma-separated), `priority`, `job_type`, `customer_id`, `branch_id`; `page=1`, `page_size=25` (maximum 100). Omitting status returns all statuses. Returns `{items,page,page_size,total,total_pages}`. |
+| `GET /api/jobs/:id`                          | Returns `{job}` with names, equipment and actor-named event history. Missing UUID returns 404; malformed UUID returns 422.                                                                                                 |
+| `POST /api/jobs`                             | Body `{customer_id,branch_id,equipment_id?,job_type,priority,description}`; equipment may be null. Returns 201 `{job}` and Location. Description is 1 to 4,000 trimmed characters.                                         |
+| `GET /api/lookups/customers`                 | Returns `{items:[{id,name}]}`.                                                                                                                                                                                             |
+| `GET /api/lookups/branches?customer_id=UUID` | Returns `{items:[{id,customer_id,name}]}`.                                                                                                                                                                                 |
+| `GET /api/lookups/equipment?branch_id=UUID`  | Returns `{items:[{id,branch_id,label,type}]}`.                                                                                                                                                                             |
+
+Shared Zod contracts live in `packages/shared/src/jobs.ts`. Invalid fields and ownership produce 422 `{error,fields}`; no session produces 401 and a disallowed role produces 403. Unknown jobs produce 404, and unexpected jobs failures produce a generic 503 without database details. Creation always sets manual source, caller actor and unassigned status server-side. The job, initial event and audit row are inserted by one statement, available in [the SQL review](docs/jobs-create.sql); field errors come from the same statement. List totals use a window count in the same query, including empty out-of-range pages.
+
+After migrations and seeding, you may run this manual, database-writing verification yourself:
+
+```powershell
+pnpm --filter @chillops/api db:verify-jobs
+```
+
+It prints the hostname, requires you to type it exactly, and reports PASS/FAIL. It tests the real create statement using seeded IDs: one job/event/audit on success, branch and equipment ownership rejection without inserts, and a generated JOB- number. Its transaction always rolls back, but sequence values are not rolled back. No append-only guards are disabled. It is never run by CI, tests or application startup. Unit tests use fake repositories and intercepted HTTP; they do not establish live SQL execution or rollback behavior.
+
 ## CI
 
 The `CI` workflow runs on pull requests and pushes to `main`. It reads the pnpm version from `package.json` and the Node.js version from `.nvmrc`, caches the pnpm store, and installs with a frozen lockfile. Lint, Typecheck, Test and Build run as separate named steps on Ubuntu.
